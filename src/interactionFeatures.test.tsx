@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import ContactsGrid from './ContactsGrid';
 import LogInteractionModal from './LogInteractionModal';
 import ContactDetailModal from './ContactDetailModal';
@@ -96,9 +96,11 @@ describe('Interaction Logging Features', () => {
     render(<ContactsGrid />);
     await waitFor(() => expect(screen.getByText('Test User')).toBeInTheDocument());
     // Simulate new interaction
-    updateInteractions?.([
-      { ...baseInteraction, date: new Date('2025-06-19T00:00:00') },
-    ]);
+    await act(async () => {
+      updateInteractions?.([
+        { ...baseInteraction, date: new Date('2025-06-19T00:00:00') },
+      ]);
+    });
     await waitFor(() => {
       const last = screen.getByText(/last interaction/i).textContent;
       if (last?.includes('—')) throw new Error('Last interaction did not update');
