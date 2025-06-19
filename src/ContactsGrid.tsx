@@ -7,6 +7,8 @@ import EditContactForm from './EditContactForm';
 import LogInteractionModal from './LogInteractionModal';
 import ContactDetailModal from './ContactDetailModal';
 import { annotateContacts, sortByUrgency } from './cadenceUtils';
+import SearchAndFilter from './SearchAndFilter';
+import { useSearchAndFilterParams } from './useSearchAndFilterParams';
 
 function formatDate(date?: Date | string) {
   if (!date) return '—';
@@ -44,6 +46,8 @@ function ContactsList() {
   const [allContacts, setAllContacts] = React.useState<ContactWithLastInteraction[]>([]);
   const [allInteractions, setAllInteractions] = React.useState<Interaction[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [searchFilter, setSearchFilter] = useState({ search: '', relationship: '', cadence: '' });
+  useSearchAndFilterParams(searchFilter, setSearchFilter);
 
   React.useEffect(() => {
     setLoading(true);
@@ -63,6 +67,28 @@ function ContactsList() {
   // Annotate and filter/sort
   const now = new Date();
   let annotated = annotateContacts(allContacts, allInteractions, now);
+  // Search and filter logic
+  annotated = annotated.filter(c => {
+    // Relationship filter (A/B/C)
+    let relOk = true;
+    if (searchFilter.relationship) {
+      if (searchFilter.relationship === 'A') relOk = c.relationshipStrength >= 8;
+      else if (searchFilter.relationship === 'B') relOk = c.relationshipStrength >= 5 && c.relationshipStrength < 8;
+      else if (searchFilter.relationship === 'C') relOk = c.relationshipStrength < 5;
+    }
+    // Cadence filter
+    let cadenceOk = true;
+    if (searchFilter.cadence) {
+      cadenceOk = (c.cadence === searchFilter.cadence || (c.cadence === 'yearly' && searchFilter.cadence === 'annual'));
+    }
+    // Search
+    let searchOk = true;
+    if (searchFilter.search) {
+      const q = searchFilter.search.toLowerCase();
+      searchOk = [c.name, c.company, c.email, c.notes].some(f => (f || '').toLowerCase().includes(q));
+    }
+    return relOk && cadenceOk && searchOk;
+  });
   if (showOverdueOnly) annotated = annotated.filter(c => c.overdue);
   if (sortBy === 'urgency') annotated = sortByUrgency(annotated);
   else if (sortBy === 'due') annotated = [...annotated].sort((a, b) => {
@@ -114,6 +140,7 @@ function ContactsList() {
 
   return (
     <>
+      <SearchAndFilter value={searchFilter} onChange={setSearchFilter} resultCount={annotated.length} />
       <div style={{ display: 'flex', gap: 16, alignItems: 'center', marginBottom: 16 }}>
         <label>
           <input type="checkbox" checked={showOverdueOnly} onChange={e => setShowOverdueOnly(e.target.checked)} /> Overdue only

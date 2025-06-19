@@ -395,7 +395,10 @@ describe('ContactsGrid integration', () => {
         expect(links[1]).toHaveTextContent('Alice');
     });
 
-    await user.selectOptions(screen.getByRole('combobox'), 'name');
+    // There are now multiple comboboxes, so select the correct one for sort
+    const sortSelects = screen.getAllByRole('combobox');
+    // The sort select is after the filter selects, so pick the last one
+    await user.selectOptions(sortSelects[sortSelects.length - 1], 'name');
 
     // New order should be Alice then Zed based on name
     await waitFor(() => {
