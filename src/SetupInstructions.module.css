@@ -1,0 +1,47 @@
+.instructions {
+  position: fixed;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+  padding: 2rem 2.5rem 1.5rem 2.5rem;
+  z-index: 1000;
+  max-width: 420px;
+  width: 90vw;
+  font-size: 1.08rem;
+  color: #222;
+  animation: fadeIn 0.3s;
+}
+.instructions h2 {
+  margin-top: 0;
+  font-size: 1.3rem;
+  color: #2a7d46;
+}
+.instructions ul {
+  margin: 0.7em 0 0.7em 1.2em;
+  padding: 0;
+}
+.instructions details {
+  margin-top: 1em;
+  font-size: 1rem;
+}
+.closeBtn {
+  margin-top: 1.2em;
+  background: #2a7d46;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5em 1.5em;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.closeBtn:hover {
+  background: #b00020;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
