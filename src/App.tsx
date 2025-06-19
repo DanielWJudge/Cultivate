@@ -3,6 +3,7 @@ import { useDatabase } from './useDatabase';
 import { generateSeedContacts, generateSeedInteractions } from './db';
 import './App.css';
 import ContactsGrid from './ContactsGrid';
+import AddContactModalButton from './AddContactModalButton';
 
 function DemoDataLoader() {
   const { db, getContacts, addContact, addInteraction } = useDatabase();
@@ -40,6 +41,7 @@ function App() {
       <div style={{ textAlign: 'center', marginTop: '2rem', fontSize: '2rem' }}>
         Welcome to Cultivate
       </div>
+      <AddContactModalButton />
       <ContactsGrid />
     </>
   );
