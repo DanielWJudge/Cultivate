@@ -4,6 +4,8 @@ import type { Contact, Interaction } from './db';
 import styles from './ContactsGrid.module.css';
 import Modal from './Modal';
 import EditContactForm from './EditContactForm';
+import LogInteractionModal from './LogInteractionModal';
+import ContactDetailModal from './ContactDetailModal';
 
 function formatDate(date?: Date | string) {
   if (!date) return '—';
@@ -13,10 +15,6 @@ function formatDate(date?: Date | string) {
 
 interface ContactWithLastInteraction extends Contact {
   lastInteraction?: Date | string;
-}
-
-interface EditState {
-  [id: string]: Partial<Contact>;
 }
 
 function validateContact(fields: Partial<Contact>): string | null {
@@ -30,15 +28,17 @@ function ContactsList() {
   const { getContacts, getInteractions, updateContact, deleteContact } = useDatabase();
   const [contacts, setContacts] = React.useState<ContactWithLastInteraction[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const [edit, setEdit] = useState<EditState>({});
   const [editError, setEditError] = useState<{ [id: string]: string | null }>({});
   const [optimistic, setOptimistic] = useState<{ [id: string]: ContactWithLastInteraction }>({});
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [editModal, setEditModal] = useState<{ open: boolean; contact: ContactWithLastInteraction | null }>({ open: false, contact: null });
+  const [logModal, setLogModal] = useState<{ open: boolean; contactId?: string }>({ open: false });
+  const [detailModal, setDetailModal] = useState<{ open: boolean; contact: Contact | null }>({ open: false, contact: null });
 
   React.useEffect(() => {
-    const sub = getContacts().subscribe(async (contacts) => {
+    // Subscribe to both contacts and interactions for live updates
+    const contactsSub = getContacts().subscribe(async (contacts) => {
       const withLast: ContactWithLastInteraction[] = await Promise.all(
         contacts.map(async (contact) => {
           let last: Interaction | undefined;
@@ -54,7 +54,31 @@ function ContactsList() {
       setContacts(withLast);
       setLoading(false);
     });
-    return () => sub.unsubscribe();
+    // Also subscribe to all interactions to force refresh on any change
+    const interactionsSub = getInteractions().subscribe(() => {
+      // This will trigger the contactsSub again due to state update
+      setLoading(true);
+      getContacts().subscribe(async (contacts) => {
+        const withLast: ContactWithLastInteraction[] = await Promise.all(
+          contacts.map(async (contact) => {
+            let last: Interaction | undefined;
+            const interactions = await new Promise<Interaction[]>((resolve) => {
+              getInteractions(contact.id).subscribe((data) => resolve(data));
+            });
+            if (interactions.length) {
+              last = interactions.reduce((a, b) => new Date(a.date) > new Date(b.date) ? a : b);
+            }
+            return { ...contact, lastInteraction: last?.date };
+          })
+        );
+        setContacts(withLast);
+        setLoading(false);
+      });
+    });
+    return () => {
+      contactsSub.unsubscribe();
+      interactionsSub.unsubscribe();
+    };
   }, [getContacts, getInteractions]);
 
   const handleEdit = (id: string) => {
@@ -71,12 +95,12 @@ function ContactsList() {
     const optimisticContact = { ...prev, ...fields };
     setOptimistic((o) => ({ ...o, [id]: optimisticContact }));
     setEditModal({ open: false, contact: null });
-    setEditError((e) => { const { [id]: _, ...rest } = e; return rest; });
+    setEditError((e) => { const rest = { ...e }; delete rest[id]; return rest; });
     try {
       await updateContact(id, fields);
-      setOptimistic((o) => { const { [id]: _, ...rest } = o; return rest; });
-    } catch (e) {
-      setOptimistic((o) => { const { [id]: _, ...rest } = o; return rest; });
+      setOptimistic((o) => { const rest = { ...o }; delete rest[id]; return rest; });
+    } catch {
+      setOptimistic((o) => { const rest = { ...o }; delete rest[id]; return rest; });
       setEditModal({ open: true, contact: prev });
       setEditError((e) => ({ ...e, [id]: 'Failed to update. Rolled back.' }));
     }
@@ -89,12 +113,12 @@ function ContactsList() {
   const confirmDelete = async () => {
     if (!deleteId) return;
     const prev = contacts.find((c) => c.id === deleteId)!;
-    setOptimistic((o) => { const { [deleteId]: _, ...rest } = o; return rest; });
+    setOptimistic((o) => { const rest = { ...o }; if (deleteId) delete rest[deleteId]; return rest; });
     setDeleteId(null);
     try {
       setContacts((c) => c.filter((x) => x.id !== deleteId));
       await deleteContact(deleteId);
-    } catch (e) {
+    } catch {
       setContacts((c) => [...c, prev]);
       setDeleteError('Failed to delete. Rolled back.');
     }
@@ -108,19 +132,39 @@ function ContactsList() {
     <>
       <div className={styles.grid}>
         {contacts.map((c) => {
-          const isEditing = false; // Modal editing only
           const optimisticC = optimistic[c.id] || c;
           return (
-            <div className={styles.card} key={c.id}>
-              <div className={styles.name}>{optimisticC.name}</div>
+            <div
+              className={styles.card}
+              key={c.id}
+              tabIndex={0}
+              role="button"
+              aria-label={`View details for ${optimisticC.name}`}
+              onClick={() => setDetailModal({ open: true, contact: c })}
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setDetailModal({ open: true, contact: c }); }}
+              style={{ cursor: 'pointer' }}
+            >
+              <div
+                className={styles.name}
+                style={{ textDecoration: 'underline', color: '#2a7d46', cursor: 'pointer' }}
+                onClick={e => { e.stopPropagation(); setDetailModal({ open: true, contact: c }); }}
+                tabIndex={0}
+                role="link"
+                aria-label={`View details for ${optimisticC.name}`}
+                onKeyDown={e => { e.stopPropagation(); if (e.key === 'Enter' || e.key === ' ') setDetailModal({ open: true, contact: c }); }}
+              >
+                {optimisticC.name}
+              </div>
               <div className={styles.company}>{optimisticC.company}</div>
               <div className={styles.strength}>Relationship: {optimisticC.relationshipStrength}/10</div>
               <div className={styles.lastInteraction}>
                 Last interaction: {formatDate(optimisticC.lastInteraction)}
               </div>
               <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                <button onClick={() => handleEdit(c.id)} style={{ color: '#fff', background: '#2a7d46', border: 'none', borderRadius: 4, padding: '0.3rem 1rem' }}>Edit</button>
-                <button onClick={() => handleDelete(c.id)} style={{ color: '#fff', background: '#b00020', border: 'none', borderRadius: 4, padding: '0.3rem 1rem' }}>Delete</button>
+                <button onClick={e => { e.stopPropagation(); handleEdit(c.id); }} style={{ color: '#fff', background: '#2a7d46', border: 'none', borderRadius: 4, padding: '0.3rem 1rem' }}>Edit</button>
+                <button onClick={e => { e.stopPropagation(); handleDelete(c.id); }} style={{ color: '#fff', background: '#b00020', border: 'none', borderRadius: 4, padding: '0.3rem 1rem' }}>Delete</button>
+                <button onClick={e => { e.stopPropagation(); setLogModal({ open: true, contactId: c.id }); }} style={{ color: '#fff', background: '#0077cc', border: 'none', borderRadius: 4, padding: '0.3rem 1rem' }}>Log Interaction</button>
+                {/* Removed View button */}
               </div>
             </div>
           );
@@ -147,6 +191,17 @@ function ContactsList() {
           </div>
         </div>
       </Modal>
+      <LogInteractionModal
+        open={logModal.open}
+        onClose={() => setLogModal({ open: false })}
+        contacts={contacts}
+        defaultContactId={logModal.contactId}
+      />
+      <ContactDetailModal
+        open={detailModal.open}
+        onClose={() => setDetailModal({ open: false, contact: null })}
+        contact={detailModal.contact}
+      />
     </>
   );
 }

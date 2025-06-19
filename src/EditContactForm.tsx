@@ -11,7 +11,6 @@ interface EditContactFormProps {
 
 export default function EditContactForm({ contact, onSave, onCancel, error }: EditContactFormProps) {
   const [fields, setFields] = React.useState<Partial<Contact>>({ ...contact });
-  const [touched, setTouched] = React.useState<{ [K in keyof Contact]?: boolean }>({});
 
   function validate() {
     if (!fields.name || !fields.name.trim()) return 'Name is required.';
@@ -28,8 +27,8 @@ export default function EditContactForm({ contact, onSave, onCancel, error }: Ed
     }));
   }
 
-  function handleBlur(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
-    setTouched((t) => ({ ...t, [e.target.name]: true }));
+  function handleBlur() {
+    // No-op
   }
 
   function handleSubmit(e: React.FormEvent) {

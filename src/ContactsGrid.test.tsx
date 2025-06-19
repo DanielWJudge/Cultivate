@@ -52,7 +52,7 @@ describe('ContactsGrid', () => {
 
   beforeEach(() => {
     getContacts = vi.fn();
-    getInteractions = vi.fn();
+    getInteractions = vi.fn(() => ({ subscribe: (cb: (interactions: Interaction[]) => void) => { cb([]); return { unsubscribe: () => {} }; } }));
     vi.spyOn(useDatabaseModule, 'useDatabase').mockReturnValue(
       makeMockDatabase({ getContacts, getInteractions })
     );
