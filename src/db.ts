@@ -184,3 +184,91 @@ export function generateSeedContacts(): Contact[] {
   ];
   return contacts;
 }
+
+export function generateSeedInteractions(): Interaction[] {
+  // Each contact gets a different last interaction date
+  const base = new Date();
+  const daysAgo = [1, 3, 7, 14, 30, 60, 90, 120, 180, 365];
+  return [
+    {
+      id: 'i1',
+      contactId: '1',
+      date: new Date(base.getTime() - daysAgo[0] * 86400000),
+      channel: 'email',
+      notes: 'Followed up on project.',
+      createdAt: new Date(base.getTime() - daysAgo[0] * 86400000),
+    },
+    {
+      id: 'i2',
+      contactId: '2',
+      date: new Date(base.getTime() - daysAgo[1] * 86400000),
+      channel: 'call',
+      notes: 'Quarterly check-in.',
+      createdAt: new Date(base.getTime() - daysAgo[1] * 86400000),
+    },
+    {
+      id: 'i3',
+      contactId: '3',
+      date: new Date(base.getTime() - daysAgo[2] * 86400000),
+      channel: 'meeting',
+      notes: 'Design review.',
+      createdAt: new Date(base.getTime() - daysAgo[2] * 86400000),
+    },
+    {
+      id: 'i4',
+      contactId: '4',
+      date: new Date(base.getTime() - daysAgo[3] * 86400000),
+      channel: 'email',
+      notes: 'Networking event follow-up.',
+      createdAt: new Date(base.getTime() - daysAgo[3] * 86400000),
+    },
+    {
+      id: 'i5',
+      contactId: '5',
+      date: new Date(base.getTime() - daysAgo[4] * 86400000),
+      channel: 'call',
+      notes: 'Family catch-up.',
+      createdAt: new Date(base.getTime() - daysAgo[4] * 86400000),
+    },
+    {
+      id: 'i6',
+      contactId: '6',
+      date: new Date(base.getTime() - daysAgo[5] * 86400000),
+      channel: 'meeting',
+      notes: 'Hackathon debrief.',
+      createdAt: new Date(base.getTime() - daysAgo[5] * 86400000),
+    },
+    {
+      id: 'i7',
+      contactId: '7',
+      date: new Date(base.getTime() - daysAgo[6] * 86400000),
+      channel: 'email',
+      notes: 'Introduced to new client.',
+      createdAt: new Date(base.getTime() - daysAgo[6] * 86400000),
+    },
+    {
+      id: 'i8',
+      contactId: '8',
+      date: new Date(base.getTime() - daysAgo[7] * 86400000),
+      channel: 'call',
+      notes: 'Investor update.',
+      createdAt: new Date(base.getTime() - daysAgo[7] * 86400000),
+    },
+    {
+      id: 'i9',
+      contactId: '9',
+      date: new Date(base.getTime() - daysAgo[8] * 86400000),
+      channel: 'meeting',
+      notes: 'Research summit recap.',
+      createdAt: new Date(base.getTime() - daysAgo[8] * 86400000),
+    },
+    {
+      id: 'i10',
+      contactId: '10',
+      date: new Date(base.getTime() - daysAgo[9] * 86400000),
+      channel: 'email',
+      notes: 'Startup pitch follow-up.',
+      createdAt: new Date(base.getTime() - daysAgo[9] * 86400000),
+    },
+  ];
+}
