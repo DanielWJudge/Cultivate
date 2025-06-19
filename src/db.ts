@@ -8,7 +8,7 @@ export interface Contact {
   company: string;
   title: string;
   relationshipStrength: number; // 1-10
-  cadence: string; // e.g. 'monthly', 'quarterly'
+  cadence: string; // e.g. 'monthly', 'quarterly', 'annual'
   notes: string;
   howWeMet: string;
   createdAt: Date;
@@ -119,7 +119,7 @@ export function generateSeedContacts(): Contact[] {
       company: 'Zeta Solutions',
       title: 'Engineer',
       relationshipStrength: 4,
-      cadence: 'yearly',
+      cadence: 'annual',
       notes: 'Met at hackathon.',
       howWeMet: 'Hackathon',
       createdAt: now,
@@ -147,7 +147,7 @@ export function generateSeedContacts(): Contact[] {
       company: 'Theta Tech',
       title: 'CEO',
       relationshipStrength: 3,
-      cadence: 'yearly',
+      cadence: 'annual',
       notes: 'Met at investor meeting.',
       howWeMet: 'Investor meeting',
       createdAt: now,

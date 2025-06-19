@@ -136,10 +136,10 @@ export default function AddContactForm() {
       </div>
 
       <label htmlFor="cadence">Cadence</label>
-      <select id="cadence" name="cadence" value={fields.cadence} onChange={handleChange} onBlur={handleBlur}>
+      <select id="cadence" name="cadence" value={fields.cadence === 'yearly' ? 'annual' : fields.cadence} onChange={handleChange} onBlur={handleBlur}>
         <option value="monthly">Monthly</option>
         <option value="quarterly">Quarterly</option>
-        <option value="yearly">Yearly</option>
+        <option value="annual">Yearly</option>
       </select>
 
       <label htmlFor="notes">Notes</label>

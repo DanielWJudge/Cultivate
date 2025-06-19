@@ -55,3 +55,34 @@
   color: #888;
   font-size: 1.1rem;
 }
+.statusOverdue {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #b00020;
+  border: 2px solid #b00020;
+  margin-right: 4px;
+}
+.statusDueSoon {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffd600;
+  border: 2px solid #bfa900;
+  margin-right: 4px;
+}
+.statusOk {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #2a7d46;
+  border: 2px solid #2a7d46;
+  margin-right: 4px;
+}
+.nextTouch {
+  font-size: 0.95rem;
+  margin-top: 2px;
+}

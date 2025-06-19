@@ -78,10 +78,10 @@ export default function EditContactForm({ contact, onSave, onCancel, error }: Ed
         required
       />
       <label htmlFor="edit-cadence">Cadence</label>
-      <select id="edit-cadence" name="cadence" value={fields.cadence || 'monthly'} onChange={handleChange} onBlur={handleBlur}>
+      <select id="edit-cadence" name="cadence" value={fields.cadence === 'yearly' ? 'annual' : fields.cadence || 'monthly'} onChange={handleChange} onBlur={handleBlur}>
         <option value="monthly">Monthly</option>
         <option value="quarterly">Quarterly</option>
-        <option value="yearly">Yearly</option>
+        <option value="annual">Yearly</option>
       </select>
       <label htmlFor="edit-notes">Notes</label>
       <textarea id="edit-notes" name="notes" value={fields.notes || ''} onChange={handleChange} onBlur={handleBlur} />
